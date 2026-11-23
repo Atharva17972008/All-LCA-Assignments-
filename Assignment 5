@@ -44,7 +44,7 @@ int main() {
                 fgets(s2, sizeof(s2), stdin);
                 s2[strcspn(s2, "\n")] = '\0';
                 
-                strcpy(temp, s1); // Use temp[200] so it doesn't overflow
+                strcpy(temp, s1);
                 strcat(temp, s2);
                 printf("Concatenated string = %s\n", temp);
                 break;
