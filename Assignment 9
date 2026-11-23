@@ -1,1 +1,97 @@
+#include <stdio.h>
+
+struct RobotRecord {
+    int recordId;
+    float depth;
+    float waterPressure;
+    float temperature;
+    float battery;
+    int defectsDetected;
+};
+
+int main() {
+    int n, i;
+
+    printf("==================================================\n");
+    printf("   UNDERWATER ROBOT INSPECTION SYSTEM\n");
+    printf("==================================================\n");
+
+    printf("Enter the number of records to store: ");
+    scanf("%d", &n);
+
+    struct RobotRecord records[n];
+
+    for (i = 0; i < n; i++) {
+        printf("\n--- Enter Details for Record #%d ---\n", i + 1);
+        records[i].recordId = i + 1;
+
+        printf("Depth (in meters): ");
+        scanf("%f", &records[i].depth);
+
+        printf("Water Pressure (in bar): ");
+        scanf("%f", &records[i].waterPressure);
+
+        printf("Temperature (in Celsius): ");
+        scanf("%f", &records[i].temperature);
+
+        printf("Battery Percentage (0-100): ");
+        scanf("%f", &records[i].battery);
+
+        printf("Number of Detected Structural Defects: ");
+        scanf("%d", &records[i].defectsDetected);
+    }
+
+    printf("\n\n==================================================\n");
+    printf("          FINAL INSPECTION REPORT\n");
+    printf("==================================================\n");
+
+    int unsafeCount = 0;
+
+    for (i = 0; i < n; i++) {
+        int isUnsafe = 0;
+
+        printf("\nRecord ID: %d\n", records[i].recordId);
+        printf("Depth: %.2f m | Pressure: %.2f bar | Temp: %.2f C | Battery: %.1f%% | Defects: %d\n",
+               records[i].depth, records[i].waterPressure, records[i].temperature,
+               records[i].battery, records[i].defectsDetected);
+
+        printf("Status: ");
+
+        if (records[i].depth > 500.0) {
+            printf("[WARNING: High Depth > 500m] ");
+            isUnsafe = 1;
+        }
+        if (records[i].waterPressure > 50.0) {
+            printf("[WARNING: High Pressure > 50 bar] ");
+            isUnsafe = 1;
+        }
+        if (records[i].temperature < 0.0 || records[i].temperature > 45.0) {
+            printf("[WARNING: Extreme Temperature] ");
+            isUnsafe = 1;
+        }
+        if (records[i].battery < 20.0) {
+            printf("[WARNING: Low Battery < 20%%] ");
+            isUnsafe = 1;
+        }
+        if (records[i].defectsDetected > 0) {
+            printf("[ALERT: %d Structural Defect(s) Found] ", records[i].defectsDetected);
+            isUnsafe = 1;
+        }
+
+        if (isUnsafe == 0) {
+            printf("SAFE - All operating parameters normal.");
+        } else {
+            unsafeCount++;
+        }
+        printf("\n--------------------------------------------------\n");
+    }
+
+    printf("\nSUMMARY:\n");
+    printf("Total Records Processed : %d\n", n);
+    printf("Safe Records            : %d\n", n - unsafeCount);
+    printf("Unsafe Records          : %d\n", unsafeCount);
+    printf("==================================================\n");
+
+    return 0;
+}
 
