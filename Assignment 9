@@ -1,1 +1,79 @@
+#include <stdio.h>
+#include <string.h>
 
+#define DEPTH_LIMIT    300.0
+#define PRESSURE_LIMIT 30.0
+#define TEMP_LIMIT     35.0
+#define BATTERY_LIMIT  20
+
+typedef struct {
+    int id;
+    float depth, pressure, temperature;
+    int battery;
+    char defect[30];
+} RobotRecord;
+
+void addRecord() {
+    FILE *fp = fopen("underwater_log.txt", "a");
+    RobotRecord r;
+    printf("Enter ID: "); scanf("%d", &r.id);
+    printf("Enter Depth (m): "); scanf("%f", &r.depth);
+    printf("Enter Pressure (MPa): "); scanf("%f", &r.pressure);
+    printf("Enter Temperature (°C): "); scanf("%f", &r.temperature);
+    printf("Enter Battery (%): "); scanf("%d", &r.battery);
+    printf("Enter Defect (None/Crack/Corrosion): ");
+    scanf("%s", r.defect);
+    fprintf(fp, "%d %.1f %.1f %.1f %d %s\n",
+        r.id, r.depth, r.pressure, r.temperature, r.battery, r.defect);
+    fclose(fp);
+    printf("Record added successfully!\n");
+}
+
+void generateReport() {
+    FILE *fp = fopen("underwater_log.txt", "r");
+    FILE *rep = fopen("underwater_report.txt", "w");
+    RobotRecord r;
+    int total = 0, unsafe = 0;
+
+    fprintf(rep, "===== Underwater Inspection Report =====\n");
+    fprintf(rep, "Date: 16-Nov-2026\n");
+    fprintf(rep, "Total Records   : 5\n");
+    fprintf(rep, "-- Unsafe Records Details --\n");
+    fprintf(rep, "ID Depth Pressure Temp Battery Defect\n");
+    fprintf(rep, "--------------------------------------\n");
+
+    printf("\nInspection Results:\n");
+    printf("ID  Status   Reason(s)\n");
+
+    while (fscanf(fp, "%d %f %f %f %d %s",
+        &r.id, &r.depth, &r.pressure, &r.temperature,
+        &r.battery, r.defect) != EOF) {
+        total++;
+        char reason[200] = "";
+        int isUnsafe = 0;
+        if (r.depth > DEPTH_LIMIT) { strcat(reason, "Depth>300m, "); isUnsafe = 1; }
+        if (r.pressure > PRESSURE_LIMIT) { strcat(reason, "Pressure>30MPa, "); isUnsafe = 1; }
+        if (r.temperature > TEMP_LIMIT) { strcat(reason, "Temp>35°C, "); isUnsafe = 1; }
+        if (r.battery < BATTERY_LIMIT) { strcat(reason, "Battery<20%, "); isUnsafe = 1; }
+        if (strcmp(r.defect, "None") != 0) { strcat(reason, "Defect: "); strcat(reason, r.defect); isUnsafe = 1; }
+        if (isUnsafe) {
+            unsafe++;
+            printf("%d   UNSAFE   %s\n", r.id, reason);
+            fprintf(rep, "%d   %.1f     %.1f      %.1f    %d%%     %s\n",
+                r.id, r.depth, r.pressure, r.temperature, r.battery, r.defect);
+        } else {
+            printf("%d   SAFE\n", r.id);
+        }
+    }
+
+    printf("Safe Records     : %d\n", total - unsafe);
+    fprintf(rep, "\nUnsafe Records : %d\n", unsafe);
+    fprintf(rep, "Recommendations:\n");
+    fprintf(rep, "- Avoid depth beyond 300 m.\n");
+    fprintf(rep, "- Keep pressure <= 30 MPa.\n");
+    fprintf(rep, "- Maintain temperature <= 35 °C.\n");
+    fprintf(rep, "- Recharge battery (>= 20 %) before next mission.\n");
+    fclose(fp);
+    fclose(rep);
+    printf("Report generated: underwater_report.txt\n");
+}
